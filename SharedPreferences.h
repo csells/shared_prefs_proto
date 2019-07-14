@@ -19,4 +19,14 @@ public:
       dbg::wcout << L"localAppData= " << localAppData.c_str() << endl;
     }
   }
+
+  void setString(const wchar_t* key, const wchar_t* value) {
+    // TODO: write this to an ini file at the LocalAppData folder
+  }
+
+  wstring getString(const wchar_t* key) {
+    return wstring(L"hello, world");
+    // TODO: read this from an ini file at the LocalAppData folder
+  }
+
 };

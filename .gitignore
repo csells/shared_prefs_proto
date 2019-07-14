@@ -1,3 +1,4 @@
 Debug/
 *.filters
 *.user
+.vscode

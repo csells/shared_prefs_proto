@@ -1,10 +1,5 @@
 #include "pch.h"
 #include "basic_debugbuf.h"
-#include <ostream>
-#include <sstream>
-#include <string>
-
-using namespace std;
 
 namespace dbg {
   dostream cout;
