@@ -1,23 +1,35 @@
 #pragma once
 
 #include "pch.h"
-#include <iostream>
+#include <sstream>
 #include "basic_debugbuf.h"
 
 using namespace std;
 
 class SharedPreferences {
-  wstring localAppData;
+  wstring localAppDataFile;
 
 public:
   SharedPreferences() {
-    PWSTR path = NULL;
-    if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, KF_FLAG_CREATE, NULL, &path))) {
-      localAppData.append(path);
-      CoTaskMemFree(path);
+    wostringstream ss;
 
-      dbg::wcout << L"localAppData= " << localAppData.c_str() << endl;
-    }
+    PWSTR localAppDataFolder = NULL;
+    SHGetKnownFolderPath(FOLDERID_LocalAppData, KF_FLAG_CREATE, NULL, &localAppDataFolder);
+    ss << localAppDataFolder;
+    CoTaskMemFree(localAppDataFolder);
+
+    wstring modulePath;
+    modulePath.reserve(MAX_PATH);
+    GetModuleFileNameW(NULL, &modulePath[0], MAX_PATH);
+
+    wstring moduleFileName;
+    moduleFileName.reserve(_MAX_FNAME);
+    _wsplitpath_s(modulePath.c_str(), NULL, 0, NULL, 0, &moduleFileName[0], _MAX_FNAME, NULL, 0);
+    ss << L'\\' << moduleFileName.c_str() << L"\\prefs.ini";
+
+    localAppDataFile.assign(ss.str());
+
+    dbg::wcout << L"SharedPreferences.localAppDataFile= '" << localAppDataFile.c_str() << "'" << endl;
   }
 
   void setString(const wchar_t* key, const wchar_t* value) {

@@ -20,8 +20,8 @@ void expect(wstring file, int line, const wchar_t* expected, const wchar_t* actu
 int main() {
   auto prefs = new SharedPreferences();
 
+  // from https://github.com/flutter/plugins/blob/master/packages/shared_preferences/test/shared_preferences_test.dart
   prefs->setString(L"s1", L"hello, world");
   auto value = prefs->getString(L"s1");
   E(L"hello, world", value.c_str());
-
 }
