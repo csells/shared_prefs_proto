@@ -7,10 +7,15 @@
 using namespace std;
 
 class SharedPreferences {
-  wstring localAppDataFile;
+  const wstring prefsFileName = getPrefsFileName();
 
 public:
   SharedPreferences() {
+    dbg::wcout << L"SharedPreferences.prefsFileName= '" << prefsFileName.c_str() << "'" << endl;
+  }
+
+private:
+  static wstring getPrefsFileName() {
     wostringstream ss;
 
     PWSTR localAppDataFolder = NULL;
@@ -27,11 +32,10 @@ public:
     _wsplitpath_s(modulePath.c_str(), NULL, 0, NULL, 0, &moduleFileName[0], _MAX_FNAME, NULL, 0);
     ss << L'\\' << moduleFileName.c_str() << L"\\prefs.ini";
 
-    localAppDataFile.assign(ss.str());
-
-    dbg::wcout << L"SharedPreferences.localAppDataFile= '" << localAppDataFile.c_str() << "'" << endl;
+    return ss.str();
   }
 
+public:
   void setString(const wchar_t* key, const wchar_t* value) {
     // TODO: write this to an ini file at the LocalAppData folder
   }
