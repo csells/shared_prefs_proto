@@ -13,6 +13,7 @@
 #include <windows.h>
 //#include <secext.h>
 #include <shlobj_core.h> // SHGetKnownFolderPath 
+#include <strsafe.h> // StringCchPrintf
 
 
 #endif //PCH_H
