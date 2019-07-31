@@ -11,7 +11,7 @@ public:
 	static wstring getLastErrorMessage() {
 		DWORD dw = GetLastError();
 		wchar_t* msgBuf;
-		FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&msgBuf, 0, 0);
+		FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPTSTR>(&msgBuf), 0, 0);
 		wostringstream oss;
 		oss << msgBuf << L"(0x" << setw(4) << setfill(L'0') << setbase(16) << dw << L")";
 		LocalFree(msgBuf);
@@ -19,7 +19,7 @@ public:
 	}
 
 	// from https://stackoverflow.com/questions/1976007/what-characters-are-forbidden-in-windows-and-linux-directory-names
-	static wstring getSimpleFilename(const wchar_t* baseFilenameNoExt) {
+	static wstring getSimpleFilename(const wstring& baseFilenameNoExt) {
 		// keep just these characters which we know are simple and safe: 'A-Za-z0-9-_ '
 		wstring filename = regex_replace(baseFilenameNoExt, wregex(L"[^A-Za-z0-9-_ ]"), L"");
 
@@ -33,6 +33,9 @@ public:
 		for (auto pch = filename.rbegin(); pch != filename.rend(); ++pch) {
 			if ((*pch == L' ') || (*pch == L'.')) *pch = 0;
 		}
+
+		// check for an empty file
+		if (filename.empty()) filename = L"myfile";
 
 		return filename;
 	}
@@ -58,7 +61,7 @@ class VersionInfo {
 private:
 	BYTE* pVI;
 
-	wstring getStringFileInfo(const wchar_t* label) {
+	wstring getStringFileInfo(const wstring& label) {
 		// First, to get string information, we need to get language information
 		WORD* langInfo;
 		UINT cbLang;
@@ -90,9 +93,9 @@ private:
 	}
 
 public:
-	VersionInfo(const wchar_t* filename) {
+	VersionInfo(const wstring& filename) {
 		DWORD useless;
-		auto size = GetFileVersionInfoSizeExW(FILE_VER_GET_LOCALISED, filename, &useless);
+		auto size = GetFileVersionInfoSizeExW(FILE_VER_GET_LOCALISED, filename.c_str(), &useless);
 		if (size == 0) {
 			wostringstream err;
 			err << L"GetFileVersionInfoSizeExW failed. fileName= '" << filename << "'. " << WindowsUtility::getLastErrorMessage();
@@ -100,7 +103,7 @@ public:
 		}
 
 		pVI = new BYTE[size];
-		auto success = GetFileVersionInfoExW(FILE_VER_GET_LOCALISED, filename, 0, size, pVI);
+		auto success = GetFileVersionInfoExW(FILE_VER_GET_LOCALISED, filename.c_str(), 0, size, pVI);
 		if (!success) {
 			wostringstream err;
 			err << L"GetFileVersionInfoExW failed. fileName= '" << filename << "'. " << WindowsUtility::getLastErrorMessage();
