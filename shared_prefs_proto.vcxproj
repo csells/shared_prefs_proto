@@ -156,6 +156,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="SharedPreferences.h" />
     <ClInclude Include="shared_prefs_proto.h" />
+    <ClInclude Include="VersionInfo.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="basic_debugbuf.cpp" />
