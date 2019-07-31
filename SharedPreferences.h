@@ -2,8 +2,8 @@
 #include "pch.h"
 #include <sstream>
 #include <vector>
-#include <variant>
 #include "basic_debugbuf.h"
+#include "VersionInfo.h"
 
 using namespace std;
 
@@ -44,27 +44,6 @@ private:
     return ss.str();
   }
 
-  static wstring getLastErrorMessage() {
-    DWORD dw = GetLastError();
-
-    wchar_t* msgBuf;
-    FormatMessageW(
-      FORMAT_MESSAGE_ALLOCATE_BUFFER |
-      FORMAT_MESSAGE_FROM_SYSTEM |
-      FORMAT_MESSAGE_IGNORE_INSERTS,
-      NULL,
-      dw,
-      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-      (LPTSTR)&msgBuf,
-      0,
-      NULL);
-
-    wostringstream ss;
-    ss << msgBuf << L"(" << dw << L")";
-    LocalFree(msgBuf);
-    return ss.str();
-  }
-
   static wstring getListSizeKey(const wchar_t* key) {
     return (wostringstream() << key << L".size").str();
   }
@@ -81,7 +60,7 @@ public:
     auto size = GetPrivateProfileStringW(sectionName, key, defval, &value[0], value.capacity(), prefsFileName.c_str());
     if (size == 0) {
       wostringstream err;
-      err << L"getString failed. key= '" << key << L"'. " << getLastErrorMessage();
+      err << L"GetPrivateProfileStringW failed. sectionName='" << sectionName << "' key='" << key << L"'. " << WindowsUtility::getLastErrorMessage();
       throw err.str();
     }
 
@@ -122,7 +101,7 @@ public:
     auto success = WritePrivateProfileStringW(sectionName, key, value, prefsFileName.c_str());
     if (!success) {
       wostringstream err;
-      err << L"setString failed. key= '" << key << L"', value= '" << value << L"'. " << getLastErrorMessage();
+      err << L"WritePrivateProfileStringW failed. sectionName='" << sectionName << "' key='" << key << L"', value='" << value << L"'. " << WindowsUtility::getLastErrorMessage();
       throw err.str();
     }
   }
@@ -189,7 +168,7 @@ public:
     auto success = WritePrivateProfileSectionW(sectionName, 0, prefsFileName.c_str());
     if (!success) {
       wostringstream err;
-      err << L"clear failed. " << getLastErrorMessage();
+      err << L"WritePrivateProfileSectionW failed. sectionName= '" << sectionName << "'. " << WindowsUtility::getLastErrorMessage();
       throw err.str();
     }
   }
