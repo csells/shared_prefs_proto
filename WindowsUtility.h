@@ -31,7 +31,8 @@ public:
 
     // trim trailing spaces and dots
     for (auto pch = filename.rbegin(); pch != filename.rend(); ++pch) {
-      if ((*pch == L' ') || (*pch == L'.')) *pch = 0;
+      if ((*pch != L' ') && (*pch != L'.')) break;
+      *pch = 0;
     }
 
     return filename;

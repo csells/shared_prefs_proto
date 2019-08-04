@@ -160,6 +160,10 @@ void testSimpleFilename() {
   // empty
   auto fn4 = WindowsUtility::getSimpleFilename(L"<>:\"/\\?*");
   E(L"", fn4.c_str());
+
+  // with spaces
+  auto fn5 = WindowsUtility::getSimpleFilename(L"one two three");
+  E(L"one two three", fn5.c_str());
 }
 
 void dumpVersionInfo(const VersionInfo& ver) {
