@@ -17,7 +17,7 @@ template<class T> void expect(wstring file, int line, T expected, T actual) {
     wcout << "test passed @ " << fileline.str() << endl;
   }
   else {
-    wcerr << "test failed @ " << fileline.str() << ": expected '" << expected << "' vs. actual '" << actual << "'" << endl;
+    wcerr << "TEST FAILED @ " << fileline.str() << ": expected '" << expected << "' vs. actual '" << actual << "'" << endl;
   }
 }
 
@@ -183,17 +183,19 @@ void dumpVersionInfo(const VersionInfo& ver) {
 }
 
 void testVersionInfo() {
-  auto filename = L"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\Common7\\IDE\\devenv.exe";
-  VersionInfo ver1(filename);
-  dumpVersionInfo(ver1);
-
-  try {
-    VersionInfo ver2;
-    dumpVersionInfo(ver2);
-  }
-  catch (const wstring& err) {
-    wcout << "Can't load VERSIONINFO: " << err << endl;
-  }
+  VersionInfo ver;
+  E(L"", ver.getComments().c_str());
+  E(L"Acme, Corp.", ver.getCompanyName().c_str());
+  E(L"A set of low-level Flutter plugin utility tests", ver.getFileDescription().c_str());
+  E(L"1.0.0.1", ver.getFileVersion().c_str());
+  E(L"shared_p.exe", ver.getInternalName().c_str());
+  E(L"Copyright (C) 2019", ver.getLegalCopyright().c_str());
+  E(L"", ver.getLegalTrademarks().c_str());
+  E(L"shared_p.exe", ver.getOriginalFilename().c_str());
+  E(L"", ver.getPrivateBuild().c_str());
+  E(L"Shared Preferences Prototype", ver.getProductName().c_str());
+  E(L"1.0.0.1", ver.getProductVersion().c_str());
+  E(L"", ver.getSpecialBuild().c_str());
 }
 
 int main() {
