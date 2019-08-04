@@ -206,6 +206,9 @@ public:
   }
 
   bool containsKey(const wstring& key) {
+    // check for a string list first
+    if( wcscmp(getString(getListSizeKey(key), missingUuid).c_str(), missingUuid) != 0 ) return true;
+    
     // if our default UUID is returned to us, the key isn't set in our preferences
     return wcscmp(getString(key, missingUuid).c_str(), missingUuid) != 0;
   }

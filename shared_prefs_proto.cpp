@@ -110,6 +110,22 @@ void testSharedPrefs() {
     else throw "oops";
   }
 
+  // check that they're all there
+  auto ck1 = prefs.containsKey(L"s1");
+  E(true, ck1);
+
+  auto ck2 = prefs.containsKey(L"b1");
+  E(true, ck2);
+
+  auto ck3 = prefs.containsKey(L"i1");
+  E(true, ck3);
+
+  auto ck4 = prefs.containsKey(L"d1");
+  E(true, ck4);
+
+  auto ck5 = prefs.containsKey(L"sl1");
+  E(true, ck5);
+
   // remove some values
   prefs.remove(L"s1");
   prefs.remove(L"b1");
