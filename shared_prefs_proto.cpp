@@ -166,22 +166,6 @@ void testSimpleFilename() {
   E(L"one two three", fn5.c_str());
 }
 
-void dumpVersionInfo(const VersionInfo& ver) {
-  wcout << L"Version info for file: " << ver.getFilename() << endl;
-  wcout << "  Comments: '" << ver.getComments() << "'" << endl;
-  wcout << "  CompanyName: '" << ver.getCompanyName() << "'" << endl;
-  wcout << "  FileDescription: '" << ver.getFileDescription() << "'" << endl;
-  wcout << "  FileVersion: '" << ver.getFileVersion() << "'" << endl;
-  wcout << "  InternalName: '" << ver.getInternalName() << "'" << endl;
-  wcout << "  LegalCopyright: '" << ver.getLegalCopyright() << "'" << endl;
-  wcout << "  LegalTrademarks: '" << ver.getLegalTrademarks() << "'" << endl;
-  wcout << "  OriginalFilename: '" << ver.getOriginalFilename() << "'" << endl;
-  wcout << "  PrivateBuild: '" << ver.getPrivateBuild() << "'" << endl;
-  wcout << "  ProductName: '" << ver.getProductName() << "'" << endl;
-  wcout << "  ProductVersion: '" << ver.getProductVersion() << "'" << endl;
-  wcout << "  SpecialBuild: '" << ver.getSpecialBuild() << "'" << endl;
-}
-
 void testVersionInfo() {
   VersionInfo ver;
   E(L"", ver.getComments().c_str());
