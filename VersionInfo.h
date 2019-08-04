@@ -8,14 +8,14 @@ using namespace std;
 
 // from https://www.codeguru.com/cpp/w-p/win32/versioning/article.php/c4539/Versioning-in-Windows.htm
 // e.g.
-// auto filename = L"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\Common7\\IDE\\devenv.exe";
-// VersionInfo ver(filename);
+// VersionInfo ver; // use the current running exe
 // wcout << "ProductName= '" << ver.getProductName() << "'" << endl;
 class VersionInfo {
 private:
 	BYTE* pVI;
+  wstring filename;
 
-	wstring getStringFileInfo(const wstring& label) {
+	wstring getStringFileInfo(const wstring& label) const {
 		// First, to get string information, we need to get language information
 		WORD* langInfo;
 		UINT cbLang;
@@ -47,7 +47,16 @@ private:
 	}
 
 public:
-	VersionInfo(const wstring& filename) {
+	VersionInfo(const wstring& fname = L"") {
+    filename = fname; // keep our own copy
+
+    // if we don't get a filename passed in, use the filename of the running exe
+    if (filename.empty()) {
+      filename.reserve(MAX_PATH);
+      GetModuleFileNameW(0, &filename[0], MAX_PATH);
+    }
+
+    // allocate the memory
 		DWORD useless;
 		auto size = GetFileVersionInfoSizeExW(FILE_VER_GET_LOCALISED, filename.c_str(), &useless);
 		if (size == 0) {
@@ -56,6 +65,7 @@ public:
 			throw err.str();
 		}
 
+    // get the data
 		pVI = new BYTE[size];
 		auto success = GetFileVersionInfoExW(FILE_VER_GET_LOCALISED, filename.c_str(), 0, size, pVI);
 		if (!success) {
@@ -69,16 +79,17 @@ public:
 		delete[] pVI;
 	}
 
-	wstring getComments() { return getStringFileInfo(L"Comments"); }
-	wstring getCompanyName() { return getStringFileInfo(L"CompanyName"); }
-	wstring getFileDescription() { return getStringFileInfo(L"FileDescription"); }
-	wstring getFileVersion() { return getStringFileInfo(L"FileVersion"); }
-	wstring getInternalName() { return getStringFileInfo(L"InternalName"); }
-	wstring getLegalCopyright() { return getStringFileInfo(L"LegalCopyright"); }
-	wstring getLegalTrademarks() { return getStringFileInfo(L"LegalTrademarks"); }
-	wstring getOriginalFilename() { return getStringFileInfo(L"OriginalFilename"); }
-	wstring getPrivateBuild() { return getStringFileInfo(L"PrivateBuild"); }
-	wstring getProductName() { return getStringFileInfo(L"ProductName"); }
-	wstring getProductVersion() { return getStringFileInfo(L"ProductVersion"); }
-	wstring getSpecialBuild() { return getStringFileInfo(L"SpecialBuild"); }
+  wstring getFilename() const { return filename; }
+	wstring getComments() const { return getStringFileInfo(L"Comments"); }
+	wstring getCompanyName() const { return getStringFileInfo(L"CompanyName"); }
+	wstring getFileDescription() const { return getStringFileInfo(L"FileDescription"); }
+	wstring getFileVersion() const { return getStringFileInfo(L"FileVersion"); }
+	wstring getInternalName() const { return getStringFileInfo(L"InternalName"); }
+	wstring getLegalCopyright() const { return getStringFileInfo(L"LegalCopyright"); }
+	wstring getLegalTrademarks() const { return getStringFileInfo(L"LegalTrademarks"); }
+	wstring getOriginalFilename() const { return getStringFileInfo(L"OriginalFilename"); }
+	wstring getPrivateBuild() const { return getStringFileInfo(L"PrivateBuild"); }
+	wstring getProductName() const { return getStringFileInfo(L"ProductName"); }
+	wstring getProductVersion() const { return getStringFileInfo(L"ProductVersion"); }
+	wstring getSpecialBuild() const { return getStringFileInfo(L"SpecialBuild"); }
 };

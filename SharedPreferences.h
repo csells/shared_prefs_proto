@@ -46,27 +46,43 @@ private:
 public:
   typedef variant<wstring, bool, int, double, vector<wstring>> AnyPrefValue;
 
+  // in the form of "C:\Users\<user>\AppData\Local\<company>\<product>\prefs.ini"
   static wstring getPrefsFileName() {
     wostringstream ss;
 
-    // TODO: update this to use Windows resources, i.e. company name and app name
+    // e.g. "C:\Users\<user>\AppData\Local\"
     PWSTR localAppDataFolder = NULL;
     SHGetKnownFolderPath(FOLDERID_LocalAppData, KF_FLAG_CREATE, 0, &localAppDataFolder);
     ss << localAppDataFolder;
     CoTaskMemFree(localAppDataFolder);
 
-    wstring modulePath;
-    modulePath.reserve(MAX_PATH);
-    GetModuleFileNameW(0, &modulePath[0], modulePath.capacity());
+    wstring fullModuleFilename;
+    fullModuleFilename.reserve(MAX_PATH);
+    GetModuleFileNameW(0, &fullModuleFilename[0], fullModuleFilename.capacity());
 
-    wstring moduleFileName;
-    moduleFileName.reserve(_MAX_FNAME);
-    _wsplitpath_s(modulePath.c_str(), 0, 0, 0, 0, &moduleFileName[0], moduleFileName.capacity(), 0, 0);
-    ss << L'\\' << moduleFileName.c_str();
+    // try to pull company and product name from VERSIONINFO resource
+    wstring companyName;
+    wstring productName;
+    try {
+      VersionInfo ver(fullModuleFilename);
+      companyName = WindowsUtility::getSimpleFilename(ver.getCompanyName());
+      productName = WindowsUtility::getSimpleFilename(ver.getProductName());
+    }
+    catch (wstring err) {
+      dbg::wcout << "Unable to load VERSIONINFO resource: " << err << endl;
+    }
 
-    // make sure the folder exists for the preferences file
-    CreateDirectoryW(ss.str().c_str(), NULL);
+    // if there's no VERSIONINFO, use defaults
+    if (companyName.empty()) companyName = L"Flutter";
+    if (productName.empty()) {
+      productName.reserve(_MAX_FNAME);
+      _wsplitpath_s(fullModuleFilename.c_str(), 0, 0, 0, 0, &productName[0], productName.capacity(), 0, 0);
+    }
 
+    // append company name, product name and ini file name onto the end of the path,
+    // making sure each directory exists
+    ss << L'\\' << companyName.c_str(); WindowsUtility::createDirectory(ss.str());
+    ss << L'\\' << productName.c_str(); WindowsUtility::createDirectory(ss.str());
     ss << L"\\prefs.ini";
     return ss.str();
   }

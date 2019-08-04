@@ -25,6 +25,9 @@ template<class T> void expect(wstring file, int line, T expected, T actual) {
 void testSharedPrefs() {
   SharedPreferences prefs;
 
+  // where are we read/writing preferences?
+  wcout << L"reading/writing preferences from: " << prefs.getPrefsFileName() << endl;
+
   // set some values
   prefs.setString(L"s1", L"hello, world");
   prefs.setBool(L"b1", true);
@@ -84,7 +87,28 @@ void testSharedPrefs() {
   // get all of the values as variants
   auto all = prefs.getAll();
   E((size_t)5, all.size());
-  // TODO more tests
+  for (auto const&[key, val] : all) {
+    if (key.compare(L"s1") == 0) {
+      E(L"hello, world", get<wstring>(val).c_str());
+    }
+    else if (key.compare(L"b1") == 0) {
+      E(true, get<bool>(val));
+    }
+    else if (key.compare(L"i1") == 0) {
+      E(42, get<int>(val));
+    }
+    else if (key.compare(L"d1") == 0) {
+      E(3.14, get<double>(val));
+    }
+    else if (key.compare(L"sl1") == 0) {
+      auto sl3 = get<vector<wstring>>(val);
+      E(sl1a.size(), sl3.size());
+      for (auto i = 0; i != sl3.size(); ++i) {
+        E(sl3[i].c_str(), sl1a[i].c_str());
+      }
+    }
+    else throw "oops";
+  }
 
   // remove some values
   prefs.remove(L"s1");
@@ -113,9 +137,11 @@ void testSharedPrefs() {
   E(false, containsKey);
 
   prefs.setString(L"foo", L"bar");
-  prefs.clear();
   auto containsKey2 = prefs.containsKey(L"foo");
-  E(false, containsKey2);
+  E(true, containsKey2);
+  prefs.clear();
+  auto containsKey3 = prefs.containsKey(L"foo");
+  E(false, containsKey3);
 }
 
 void testSimpleFilename() {
@@ -133,10 +159,41 @@ void testSimpleFilename() {
 
   // empty
   auto fn4 = WindowsUtility::getSimpleFilename(L"<>:\"/\\?*");
-  E(L"myfile", fn4.c_str());
+  E(L"", fn4.c_str());
+}
+
+void dumpVersionInfo(const VersionInfo& ver) {
+  wcout << L"Version info for file: " << ver.getFilename() << endl;
+  wcout << "  Comments: '" << ver.getComments() << "'" << endl;
+  wcout << "  CompanyName: '" << ver.getCompanyName() << "'" << endl;
+  wcout << "  FileDescription: '" << ver.getFileDescription() << "'" << endl;
+  wcout << "  FileVersion: '" << ver.getFileVersion() << "'" << endl;
+  wcout << "  InternalName: '" << ver.getInternalName() << "'" << endl;
+  wcout << "  LegalCopyright: '" << ver.getLegalCopyright() << "'" << endl;
+  wcout << "  LegalTrademarks: '" << ver.getLegalTrademarks() << "'" << endl;
+  wcout << "  OriginalFilename: '" << ver.getOriginalFilename() << "'" << endl;
+  wcout << "  PrivateBuild: '" << ver.getPrivateBuild() << "'" << endl;
+  wcout << "  ProductName: '" << ver.getProductName() << "'" << endl;
+  wcout << "  ProductVersion: '" << ver.getProductVersion() << "'" << endl;
+  wcout << "  SpecialBuild: '" << ver.getSpecialBuild() << "'" << endl;
+}
+
+void testVersionInfo() {
+  auto filename = L"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\Common7\\IDE\\devenv.exe";
+  VersionInfo ver1(filename);
+  dumpVersionInfo(ver1);
+
+  try {
+    VersionInfo ver2;
+    dumpVersionInfo(ver2);
+  }
+  catch (const wstring& err) {
+    wcout << "Can't load VERSIONINFO: " << err << endl;
+  }
 }
 
 int main() {
   testSharedPrefs();
   testSimpleFilename();
+  testVersionInfo();
 }
